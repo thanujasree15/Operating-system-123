@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Define a struct to represent a file or directory
+struct FileSystemEntry {
+    char name[50];
+    int isDirectory;
+};
+
+// Define a struct to represent a directory
+struct Directory {
+    char name[50];
+    struct FileSystemEntry* entries[100];
+    int numEntries;
+};
+
+// Define a struct to represent the file system
+struct FileSystem {
+    struct Directory* root;
+};
+
+// Create a new directory with the given name
+struct Directory* createDirectory(char* name) {
+    struct Directory* dir = malloc(sizeof(struct Directory));
+    strcpy(dir->name, name);
+    dir->numEntries = 0;
+    return dir;
+}
+
+// Add a new file or directory to the given directory
+void addFileSystemEntry(struct Directory* dir, char* name, int isDirectory) {
+    struct FileSystemEntry* entry = malloc(sizeof(struct FileSystemEntry));
+    strcpy(entry->name, name);
+    entry->isDirectory = isDirectory;
+    dir->entries[dir->numEntries++] = entry;
+}
+
+// Find a directory with the given name in the given directory
+struct Directory* findDirectory(struct Directory* dir, char* name) {
+    for (int i = 0; i < dir->numEntries; i++) {
+        struct FileSystemEntry* entry = dir->entries[i];
+        if (entry->isDirectory && strcmp(entry->name, name) == 0) {
+            return (struct Directory*)entry;
+        }
+    }
+    return NULL;
+}
+
+// Find a file with the given name in the given directory
+struct FileSystemEntry* findFile(struct Directory* dir, char* name) {
+    for (int i = 0; i < dir->numEntries; i++) {
+        struct FileSystemEntry* entry = dir->entries[i];
+        if (!entry->isDirectory && strcmp(entry->name, name) == 0) {
+            return entry;
+        }
+    }
+    return NULL;
+}
+
+int main() {
+    // Create the root directory
+    struct Directory* root = createDirectory("root");
+
+    // Add some files and directories to the root directory
+    addFileSystemEntry(root, "file1.txt", 0);
+    addFileSystemEntry(root, "dir1", 1);
+    addFileSystemEntry(root, "file2.txt", 0);
+
+    // Find the "dir1" directory in the root directory and add some files to it
+    struct Directory* dir1 = findDirectory(root, "dir1");
+    addFileSystemEntry(dir1, "file3.txt", 0);
+    addFileSystemEntry(dir1, "file4.txt", 0);
+
+    // Find the "file1.txt" file in the root directory and print its name
+    struct FileSystemEntry* file1 = findFile(root, "file1.txt");
+    printf("%s\n", file1->name);
+
+    // Find the "file3.txt" file in the "dir1" directory and print its name
+    struct FileSystemEntry* file3 = findFile(dir1, "file3.txt");
+    printf("%s\n", file3->name);
+
+    return 0;
+}
